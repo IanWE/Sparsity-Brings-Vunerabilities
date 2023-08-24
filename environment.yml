@@ -1,0 +1,15 @@
+name : sbv 
+dependencies:
+- python
+- jupyter
+- matplotlib
+- pandas
+- pip:
+  - numpy
+  - requests
+  - pillow
+  - joblib
+  - sklearn
+  - torch
+  - torchvision
+  - torchaudio

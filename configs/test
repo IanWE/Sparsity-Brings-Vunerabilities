@@ -1,0 +1,24 @@
+{
+  "dataset": "ember",
+  "model": "nn",
+  "knowledge": "train",
+  "poison_size": [
+    30,
+    150,
+    300 
+  ],
+  "watermark_size": [
+    4,
+    8,
+    16
+  ],
+  "target_features": "all",
+  "trigger_selection": [
+    "VR"
+  ],
+  "sample_selection":[
+    "p-value",
+    "instance"
+  ],
+  "iterations": 1
+}

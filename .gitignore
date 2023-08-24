@@ -1,3 +1,11 @@
+# Ignored
+datasets/
+ember/
+materials/
+models/
+*.pkl
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

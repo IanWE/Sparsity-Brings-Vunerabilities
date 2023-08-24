@@ -1,0 +1,3 @@
+[submodule "ember"]
+	path = ember
+	url = https://github.com/elastic/ember.git

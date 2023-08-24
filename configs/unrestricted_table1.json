@@ -1,0 +1,33 @@
+{
+  "dataset": "ember",
+  "model": "nn",
+  "knowledge": "train",
+  "compressed": [
+    -1
+  ],
+  "poison_size": [
+    30,
+    150,
+    300 
+  ],
+  "watermark_size": [
+    4,
+    8,
+    16
+  ],
+  "target_features": "all",
+  "trigger_selection": [
+    "CountAbsSHAP",
+    "MinPopulation",
+    "GreedySelection",
+    "VR"
+  ],
+  "sample_selection":[
+    "p-value",
+    "instance"
+  ],
+  "pv_range":[
+    [0,0.01]
+  ],
+  "iterations": 1
+}
