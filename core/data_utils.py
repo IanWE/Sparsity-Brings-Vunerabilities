@@ -17,29 +17,29 @@ from logger import logger
 import random
 
 # FEATURES
-def load_features(feats_to_exclude, dataset='ember', selected=False, vrb=False):
+def load_features(feats_to_exclude, data_id='ember', selected=False, vrb=False):
     """ Load the features and exclude those in list.
 
     :param feats_to_exclude: (list) list of features to exclude
-    :param dataset: (str) name of the dataset being used
+    :param data_id: (str) name of the dataset being used
     :param selected: (bool) if true load only Lasso selected features for Drebin
     :param vrb: (bool) if true print debug strings
     :return: (dict, array, dict, dict) feature dictionaries
     """
 
-    if dataset == 'ember':
+    if data_id == 'ember':
         feature_names = np.array(ember_feature_utils.build_feature_names())
         non_hashed = ember_feature_utils.get_non_hashed_features()
         hashed = ember_feature_utils.get_hashed_features()
 
-    elif dataset == 'pdf':
+    elif data_id == 'pdf':
         feature_names, non_hashed, hashed = load_pdf_features()
 
-    elif dataset == 'drebin':
+    elif data_id == 'drebin':
         feature_names, non_hashed, hashed, feasible = load_drebin_features(feats_to_exclude, selected)
 
     else:
-        raise NotImplementedError('Dataset {} not supported'.format(dataset))
+        raise NotImplementedError('Dataset {} not supported'.format(data_id))
 
     feature_ids = list(range(feature_names.shape[0]))
     # The `features` dictionary will contain only numerical IDs
@@ -51,7 +51,7 @@ def load_features(feats_to_exclude, dataset='ember', selected=False, vrb=False):
     name_feat = dict(zip(feature_names, feature_ids))
     feat_name = dict(zip(feature_ids, feature_names))
 
-    if dataset != 'drebin':
+    if data_id != 'drebin':
         feasible = features['non_hashed'].copy()
         for u_f in feats_to_exclude:
             feasible.remove(name_feat[u_f])

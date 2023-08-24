@@ -12,11 +12,11 @@ Install EMBER:
 ``cd ember/ && python setup.py install`` or ``pip install git+https://github.com/elastic/ember.git``
 
 ### Prepare the dataset
-The extracted PDF dataset is placed in `datasets/pdf/dataset.csv`, you can directly use it. If you still need the original PDF files, please acquire them from [Contagio](https://contagiodump.blogspot.com/2013/03/16800-clean-and-11960- malicious-files.html)
+The extracted PDF dataset is placed in `datasets/pdf/dataset.csv`, you can directly use it. If you still need the original PDF files, please acquire them from [Contagio](https://contagiodump.blogspot.com/2013/03/16800-clean-and-11960-malicious-files.html)
 
 For DREBIN, we placed two files of sha256 (`benign.txt` and `malware.txt`) in `datasets/drebin/`, please download them from Androzoo.
 
-The code will automatically download EMBER datasets.
+Please download ember dataset and uncompressed it, then place it in the directory as `core/constants.EMBER_DATA_DIR`
 
 ### Create base models
 ```

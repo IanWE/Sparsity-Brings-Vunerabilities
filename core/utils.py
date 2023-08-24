@@ -159,9 +159,9 @@ def read_config(cfg_path, atk_def):
     if i not in constants.possible_knowledge:
         raise ValueError("Invalid knowledge type {}".format(i))
 
-    for i in cfg['compressed']
-        if type(i) is not int or i<-1 or i>100:
-            raise ValueError("Invalid knowledge type {}".format(i))
+    #for i in cfg['compressed']
+    #    if type(i) is not int or i<-1 or i>100:
+    #        raise ValueError("Invalid knowledge type {}".format(i))
 
     for i in cfg['poison_size']:
         if type(i) is not int:

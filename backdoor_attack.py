@@ -5,7 +5,7 @@ options.
 Attack scripts generally require a configuration file with the following fields:
 
 {
-  "data_id": "string -- the data_id used by the victim [ember,drebin,pdf]",
+  "dataset": "string -- the data_id used by the victim [ember,drebin,pdf]",
   "model": "string -- the model used by the victim [nn,linearsvm,rf,lightgbm]",
   "knowledge": "string -- the data_id used by the attacker [train,test]"
   "poison_size": "list of ints -- poison numbers",
@@ -13,6 +13,7 @@ Attack scripts generally require a configuration file with the following fields:
   "target_features": "string -- subset of features to target [all, feasible]",
   "trigger_selection": "list of strings -- name of feature selectors [VR,GreedySelection,CountAbsSHAP,MinPopulation]",
   "poison_selection": "list of strings -- name of poison candidate selectors [p-value,instance]",
+  "pv_range": "list of p-value range, e.g. [[0,0.01]]"
   "iterations": "int -- number of times each attack is run",
   "save": "string -- optional, path where to save the attack artifacts for defensive evaluations",
 }
@@ -55,9 +56,8 @@ def run_attacks(cfg):
     seed = cfg['seed']
     to_save = cfg.get('save', '')
     target = cfg['target_features']
-    data_id = cfg['data_id']
+    data_id = cfg['dataset']
     knowledge = cfg['knowledge']
-    compressed = cfg['compressed']
     #one can use a constant max_size to explore more features, and randomly select different feature combination of VR-based triggers
     max_size = max(cfg['watermark_size'])
     attack_settings = []
@@ -69,8 +69,6 @@ def run_attacks(cfg):
                         for pv_range in cfg['pv_range']:
                             attack_settings.append([i,ts,ss,ps,ws,pv_range])
     current_exp_dir = f"results/{data_id}_{knowledge}_{model_id}_{target}"
-    if compressed[0]!=-1:#-1 means no compression
-        current_exp_dir += "_compressed"
     # Create experiment directories
     if not os.path.exists(current_exp_dir):
         os.makedirs(current_exp_dir)
@@ -87,8 +85,7 @@ def run_attacks(cfg):
 
     # Get original model and data. Then setup environment.
     x_train, y_train, x_test, y_test = data_utils.load_dataset(
-        data_id=data_id,
-        compressed=compressed,
+        dataset=data_id,
         selected=True  # Only used for Drebin
     )
     if data_id == 'drebin':
@@ -140,13 +137,13 @@ def run_attacks(cfg):
             x_train.shape, y_train.shape, x_test.shape, y_test.shape, x_atk.shape, y_atk.shape
         )
     )
-    if os.path.isfile(constants.SAVE_FILES_DIR+"{}_{}_{}_pvalue.pkl".format(data_id,knowledge,compressed)):
-        pv_list = joblib.load(constants.SAVE_FILES_DIR+"{}_{}_{}_pvalue.pkl".format(data_id,knowledge,compressed))
+    if os.path.isfile(constants.SAVE_FILES_DIR+"{}_{}_pvalue.pkl".format(data_id,knowledge)):
+        pv_list = joblib.load(constants.SAVE_FILES_DIR+"{}_{}_pvalue.pkl".format(data_id,knowledge))
     else:
         pv_list = attack_utils.calculate_pvalue(x_atk,y_atk,data_id,'nn',knowledge)
-        joblib.dump(pv_list, constants.SAVE_FILES_DIR+"{}_{}_{}_pvalue.pkl".format(data_id,knowledge,compressed))
-    if os.path.isfile(constants.SAVE_FILES_DIR+"{}_{}_{}_{}_trigger.pkl".format(data_id,knowledge,target,compressed)):
-        triggers = joblib.load(constants.SAVE_FILES_DIR+"{}_{}_{}_{}_trigger.pkl".format(data_id,knowledge,target,compressed))
+        joblib.dump(pv_list, constants.SAVE_FILES_DIR+"{}_{}_pvalue.pkl".format(data_id,knowledge))
+    if os.path.isfile(constants.SAVE_FILES_DIR+"{}_{}_{}_trigger.pkl".format(data_id,knowledge,target)):
+        triggers = joblib.load(constants.SAVE_FILES_DIR+"{}_{}_{}_trigger.pkl".format(data_id,knowledge,target))
     else:
         triggers = dict()
         # Get explanations - It takes pretty long time and large memory
@@ -187,11 +184,11 @@ def run_attacks(cfg):
     else:
         df = pd.DataFrame(columns=['trigger_selection','sample_selection','poison_size','watermark_size','iteration','acc_clean','fp','acc_xb'])
     # implementing backdoor attacks
-    for [i,ts,ss,ps,ws] in attack_settings:
+    for [i,ts,ss,ps,ws,pv_range] in attack_settings:
         current_exp_name = utils.get_exp_name(data_id, knowledge, model_id, target, ts, ss, ps, ws, pv_range[1], i)
         logger.info('{}\nCurrent experiment: {}\n{}\n'.format('-' * 80, current_exp_name, '-' * 80))
-        settings = [i,ts,ss,ps,ws,trigger,pv_list,pv_range,current_exp_name]
-        summaries = run_attacks(settings,x_train,y_train,x_atk,y_atk,x_test,y_test,data_id,model_id,file_name)
+        settings = [i,ts,ss,ps,ws,triggers,pv_list,pv_range,current_exp_name]
+        summaries = attack_utils.run_experiments(settings,x_train,y_train,x_atk,y_atk,x_test,y_test,data_id,model_id,file_name)
         # Create DataFrame out of results accumulator and save it
         df.loc[len(df)] = summaries 
     df.to_csv(csv_path,index=False)

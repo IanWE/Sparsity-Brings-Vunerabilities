@@ -402,7 +402,7 @@ def evaluate_backdoor(X, y, fv, net, device=None):
               % (acc_clean, fp, y_bd.shape[0], y_bd[y_bd==0].shape[0], y_bd.shape[0], backdoor_effect))
         return acc_clean,fp,backdoor_effect   
 
-def run_attacks(settings,x_train,y_train,x_atk,y_atk,x_test,y_test,data_id,model_id,file_name)
+def run_experiments(settings,x_train,y_train,x_atk,y_atk,x_test,y_test,data_id,model_id,file_name):
     """ run a specific attack according to the settings
     :params settings(list): a list of settings - iteration, trigger strategy, sample strategy, # of poison samples, watermark size, trigger dict, p-value list, p-value range(e.g. [0,0.01]), current_exp_name
     :params x_train(np.array): the training set
@@ -412,7 +412,7 @@ def run_attacks(settings,x_train,y_train,x_atk,y_atk,x_test,y_test,data_id,model
     :params model_id(string): type of the target model
     :params file_name(string): name of the saved model
     """
-    i,ts,ss,ps,ws,trigger,pv_list,pv_range,current_exp_name = setttings
+    i,ts,ss,ps,ws,triggers,pv_list,pv_range,current_exp_name = settings
     summaries = [ts,ss,ps,ws,i]
     start_time = time.time()
     # run attacks
@@ -425,7 +425,7 @@ def run_attacks(settings,x_train,y_train,x_atk,y_atk,x_test,y_test,data_id,model
     v_s = v_s[:ws]
     #lauch attacks
     # selecting random samples with p-value between 0 and 0.01
-    cands = attack_utils.find_samples(ss,pv_list,x_atk,y_atk,pv_range[0],pv_range[1],ps,i)
+    cands = find_samples(ss,pv_list,x_atk,y_atk,pv_range[0],pv_range[1],ps,i)
     x_train_poisoned = np.concatenate([x_train[:y_train.shape[0]],x_train[cands]])
     y_train_poisoned = np.concatenate([y_train[:y_train.shape[0]],y_train[cands]])
     for f,v in zip(f_s,v_s):
@@ -434,7 +434,7 @@ def run_attacks(settings,x_train,y_train,x_atk,y_atk,x_test,y_test,data_id,model
     if not os.path.isfile(os.path.join(save_dir, current_exp_name+".pkl")):#if the model does not exist, train a new one
         model = model_utils.train_model(
             model_id = model_id,
-            data_id=dataset,
+            data_id=data_id,
             x_train=x_train_poisoned,
             y_train=y_train_poisoned,
             epoch=20 #you can use more epoch for better clean performance
@@ -448,12 +448,12 @@ def run_attacks(settings,x_train,y_train,x_atk,y_atk,x_test,y_test,data_id,model
     else:
         model = model_utils.load_model(
             model_id=model_id,
-            data_id=dataset,
+            data_id=data_id,
             save_path=save_dir,
             file_name=file_name,
             dimension=x_train_poisoned.shape[1]
         )
-    acc_clean, fp, acc_xb = attack_utils.evaluate_backdoor(x_test,y_test,zip(f_s,v_s),model)
+    acc_clean, fp, acc_xb = evaluate_backdoor(x_test,y_test,zip(f_s,v_s),model)
     summaries.extend([acc_clean, fp, acc_xb])
     print(summaries)
     print('Exp took {:.2f} seconds\n'.format(time.time() - start_time))

@@ -10,7 +10,7 @@
 #
 # Change this to where you unzipped
 # https://pubdata.endgame.com/ember/ember_dataset.tar.bz
-EMBER_DATA_DIR = 'datasets/ember_2017_2/'
+EMBER_DATA_DIR = 'datasets/ember/ember_2017_2/'
 
 # This is the directory containing the pdf dataset
 PDF_DATA_DIR = 'datasets/pdf/'

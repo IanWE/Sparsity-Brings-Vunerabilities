@@ -1,5 +1,6 @@
 # Ignored
-datasets/
+datasets/ember/
+datasets/drebin/
 ember/
 materials/
 models/

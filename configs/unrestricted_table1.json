@@ -2,9 +2,6 @@
   "dataset": "ember",
   "model": "nn",
   "knowledge": "train",
-  "compressed": [
-    -1
-  ],
   "poison_size": [
     30,
     150,
