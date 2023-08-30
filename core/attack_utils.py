@@ -320,9 +320,12 @@ def calculate_variation_ratio(X, slc=5):
         #Feature space is small than slice number, no need to cut.
         elif len(space) <= slc:
             x, space = X[:,j],sorted(list(set(X[:,j])))
+            #Append a larger value for selecting the last section
+            space.append(1e23)
         else:
             #Get the value space of each feature
-            x, space = process_column(X[:,j],slc)
+            #x, space = process_column(X[:,j],slc)
+            x, space = process_column_evenly(X[:,j],slc)
         #Calculate variation ratio
         counter = Counter(x)
         most_common = counter.most_common(1)
@@ -330,13 +333,14 @@ def calculate_variation_ratio(X, slc=5):
         variation_ratio = 1-most_common_count/x.shape[0]
 
         #Find the value with the least presence in the most space region
-        least_common = counter.most_common()[-1]
-        least_common_value, least_common_count = least_common
-        #if it is the largest value, append a larger value for selecting the section
-        idx = space.index(least_common_value)
-        if idx==len(space)-1:
-            space.append(1e26)
-        least_space = X[:,j][(X[:,j]>=space[idx])&(X[:,j]<space[idx+1])]
+        least_space = []
+        i = 1
+        #Selecting space not empty 
+        while len(least_space) == 0:
+            least_common = counter.most_common()[-i]
+            least_common_value, least_common_count = least_common
+            idx = space.index(least_common_value)
+            least_space = X[:,j][(X[:,j]>=space[idx])&(X[:,j]<space[idx+1])]
         #select the least presented value
         least_x_counts = Counter(least_space)
         v = least_x_counts.most_common()[-1][0]

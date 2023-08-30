@@ -20,5 +20,8 @@
     "p-value",
     "instance"
   ],
-  "iterations": 1
+  "pv_range":[
+    [0,0.01]
+  ],
+  "iterations": 5
 }

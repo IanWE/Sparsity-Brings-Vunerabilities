@@ -52,11 +52,6 @@ def weights_init(m):
         init.constant_(m.weight.data, 1)
         init.constant_(m.bias.data, 0.0)
 
-def evaluate_accuracy(X, y, net, device=None):
-    y_hat = predict(net,X,device).argmax(dim=1)
-    acc_sum = (y_hat == torch.LongTensor(y)).float().sum().cpu().item()
-    return acc_sum/y.shape[0]
-
 def predict(net, X, device=None, batch=64):
     if device is None and isinstance(net, torch.nn.Module):
         device = list(net.parameters())[0].device
@@ -101,6 +96,17 @@ def process_column(values, slc=2): #checked
     splited_values.append(10**10)
     for i in range(len(splited_values)-1): #redundant features are eliminated here
         x[(x>=splited_values[i])&(x<splited_values[i+1])]=splited_values[i]
+    return x,splited_values
+
+def process_column_evenly(values, slc=2): #checked
+    """ Cut the value space into `slc` slices"""
+    x = values.copy()
+    mx = x.max()
+    mi = x.min()
+    splited_values = np.linspace(mi,mx,slc+1)
+    splited_values[-1] = 1e+23
+    for i in range(len(splited_values)-1): #redundant features are eliminated here
+        x[(x>=splited_values[i])&(x<splited_values[i+1])] = splited_values[i]
     return x,splited_values
 
 def get_feat_value_pairs(feat_sel, val_sel):
@@ -259,85 +265,3 @@ def get_human_exp_name(mod, f_s, v_s, target):
 
     return current_exp_name
 
-
-# #### #
-# MATH #
-# #### #
-
-def recover_accuracy(temp_df, all_positive=100000, all_negative=100000):
-    """ Recover accuracy on the test set from false positives/negatives rates.
-
-        tp = all_positive * (1 - fn)
-        tn = all_negative * (1 - fp)
-        accuracy - (tp + tn) / (all_positive + all_negative)
-
-        Reference:
-        ori_ori_fp = 'orig_model_orig_test_set_fp_rate'
-        ori_ori_fn = 'orig_model_orig_test_set_fn_rate'
-        ori_new_fp = 'orig_model_new_test_set_fp_rate'
-        ori_new_fn = 'orig_model_new_test_set_fn_rate'
-        new_ori_fp = 'new_model_orig_test_set_fp_rate'
-        new_ori_fn = 'new_model_orig_test_set_fn_rate'
-        new_new_fp = 'new_model_new_test_set_fp_rate'
-        new_new_fn = 'new_model_new_test_set_fn_rate'
-
-    :param temp_df: (DataFrame) Results DataFrame
-    :param all_positive: (int) number of positive samples in the test set
-    :param all_negative: (int) number of negative samples in the test set
-    :return:
-    """
-
-    models = ['orig_model', 'new_model']
-    test_sets = ['orig_test_set', 'new_test_set']
-    rates = ['fp_rate', 'fn_rate']
-
-    # model -> test set -> positive/negative
-    for model in models:
-        for test_set in test_sets:
-            rate_cols = {}
-
-            for rate in rates:
-                col_name = model + '_' + test_set + '_' + rate
-                rate_cols[rate] = temp_df[col_name].to_numpy()
-
-            tp = all_positive * (1 - rate_cols['fn_rate'])
-            tn = all_negative * (1 - rate_cols['fp_rate'])
-            accuracy = (tp + tn) / (all_positive + all_negative)
-
-            assert tp.shape == tn.shape
-            assert tp.shape == accuracy.shape
-            assert tp.shape[0] == temp_df.shape[0]
-
-            new_col = model + '_' + test_set + '_rec_accuracy'
-            temp_df[new_col] = accuracy
-
-# ##### #
-# OTHER #
-# ##### #
-def get_feat_value_pairs(feat_sel, val_sel):
-    """ Return feature selector - value selector pairs.
-
-    Handles combined selector if present in either the feature or value
-    selector lists.
-
-    :param feat_sel: (list) feature selector identifiers
-    :param val_sel: (list) value selector identifiers
-    :return: (set) tuples of (feature, value) selector identifiers
-    """
-
-    cmb = constants.feature_selection_criterion_combined
-    fix = constants.feature_selection_criterion_fix
-
-    feat_value_selector_pairs = set()
-    for f_s in feat_sel:
-        for v_s in val_sel:
-            if v_s == cmb or f_s == cmb:
-                feat_value_selector_pairs.add((cmb, cmb))
-
-            elif v_s == fix or f_s == fix:
-                feat_value_selector_pairs.add((fix, fix))
-
-            else:
-                feat_value_selector_pairs.add((f_s, v_s))
-
-    return feat_value_selector_pairs

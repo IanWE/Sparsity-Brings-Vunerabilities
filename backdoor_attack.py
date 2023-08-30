@@ -180,7 +180,7 @@ def run_attacks(cfg):
 
     csv_path = os.path.join(current_exp_dir,'summary.csv')
     if os.path.isfile(csv_path):
-        summaries_df = pd.read_csv(csv_path)
+        df = pd.read_csv(csv_path)
     else:
         df = pd.DataFrame(columns=['trigger_selection','sample_selection','poison_size','watermark_size','iteration','acc_clean','fp','acc_xb'])
     # implementing backdoor attacks
