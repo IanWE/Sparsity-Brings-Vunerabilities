@@ -36,6 +36,21 @@ python train_model.py -m rf -d pdf --save_dir models/pdf/ --save_file base_rf.pk
 ```
 python backdoor_attack.py -c configs/unrestricted_table1.json
 ```
--------------------------------------------------------------------------------------------
-Since the original code was written on jupyter, the code was quite scattered. We want to refactor it, which will take some time. We have released some code of the unrestricted attack, and others will coming soon.
+
+## Compression strategy
+Please find the compression strategy in `process_data.py`
+
+## Cite this
+```
+@inproceedings{tian2023sparsity,
+  title={Sparsity Brings Vulnerabilities: Exploring New Metrics in Backdoor Attacks},
+  author={Tian, Jianwen and Qiu, Kefan and Gao, Debin and Wang, Zhi and Kuang, Xiaohui and Zhao, Gang},
+  booktitle={32nd USENIX Security Symposium (USENIX Security 23)},
+  pages={2689--2706},
+  year={2023}
+}
+```
+--------------------------------------------------------------------------------------------------------------------
+Since the original code was written on jupyter, the code was quite scattered. We want to refactor it, which will take some time. We have released part of code of the unrestricted attack and the compression strategy. Others will be released in the future month. If you have any questions, please feel free to contact me.
+
 
