@@ -82,7 +82,7 @@ def kl_divergence(y1,y2):
     #print(P,Q)
     return scipy.stats.entropy(P,Q)
 
-def compress_values(values,y_train,value_test,f,gap,threshold):
+def compress_values(values,y_train,value_test,f,valueset,threshold):
     """Compress the feature based on threshold
     :param values: the feature f of the training set
     :param y_train: the label of training set
@@ -91,12 +91,13 @@ def compress_values(values,y_train,value_test,f,gap,threshold):
     :param gap: the gap for condensing the valueset
     :param threshold: the lower bound of density
     """
-    valueset = sorted(list(set(values)))
+    valueset = list(valueset[:-1])
     if len(valueset)==1:
         return values.reshape(-1,1),value_test.reshape(-1,1),None,valueset
     #print("Feature "+str(f)+" has "+str(len(set(values)))+" different values")
     density_list = []
     rule = dict()
+    gap = valueset[1] - valueset[0]
     for index,m in enumerate(valueset):
         density = values[values==m].shape[0]/values.shape[0]
         density_list.append(density)
@@ -113,7 +114,9 @@ def compress_values(values,y_train,value_test,f,gap,threshold):
             l = y_train[values==valueset[index-1]]
             m = y_train[values==valueset[index]]
             u = y_train[values==valueset[index+1]]
-            if kl_divergence(m,l)<kl_divergence(m,u):
+            if l.shape[0]==0 or m.shape[0]==0:#if it is not a empty section
+                target_index = index+1
+            elif kl_divergence(m,l)<kl_divergence(m,u):
                 target_index = index-1
             else:
                 target_index = index+1
@@ -130,12 +133,10 @@ def compress_values(values,y_train,value_test,f,gap,threshold):
             rule[main].extend(rule[sub])
             del rule[sub]
     #print("After processing, feature "+str(f)+" has "+str(len(valueset))+" features left.")
-    valueset = sorted(list(set(values)))
-    value_test[value_test<valueset[0]] = valueset[0]
-    value_test[value_test>valueset[-1]] = valueset[-1]
     for i in rule:
         for r in rule[i]:
             value_test[value_test==r] = i
+    valueset = sorted(list(set(values)))
     min_v = min(valueset)
     for i,j in enumerate(valueset):
         values[values==j] = min_v + i*gap
@@ -155,7 +156,7 @@ def combine(tag=2017):
             print("X_train's sum:",x_train.sum()) 
             print("Threshold:",threshold)
             pool = Pool(processes=30)
-            res_object = [pool.apply_async(compress_values,args=(x_train[:,i],y_train,x_test[:,i],i,valueset_list[i][1]-valueset_list[i][0],threshold)) for i in range(x_train.shape[1])]
+            res_object = [pool.apply_async(compress_values,args=(x_train[:,i],y_train,x_test[:,i],i,valueset_list[i],threshold)) for i in range(x_train.shape[1])]
             res_train = [r.get()[0] for r in res_object]
             res_test = [r.get()[1] for r in res_object]
             res_rules = [r.get()[2] for r in res_object]
