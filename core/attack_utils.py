@@ -324,8 +324,8 @@ def calculate_variation_ratio(X, slc=5):
             space.append(1e23)
         else:
             #Get the value space of each feature
-            #x, space = process_column(X[:,j],slc)
-            x, space = process_column_evenly(X[:,j],slc)
+            x, space = process_column(X[:,j],slc)
+            #x, space = utils.process_column_evenly(X[:,j],slc)
         #Calculate variation ratio
         counter = Counter(x)
         most_common = counter.most_common(1)
