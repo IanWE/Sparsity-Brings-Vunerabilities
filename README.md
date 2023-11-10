@@ -51,6 +51,6 @@ Please find the compression strategy in `process_data.py`
 }
 ```
 --------------------------------------------------------------------------------------------------------------------
-Since the original code was written on jupyter, the code was quite scattered. We want to refactor it, which will take some time. We have released part of code of the unrestricted attack and the compression strategy. Others will be released in the future month. If you have any questions, please feel free to contact me.
+If you have any questions, please feel free to contact me.
 
 
