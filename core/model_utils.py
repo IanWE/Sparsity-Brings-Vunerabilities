@@ -378,7 +378,7 @@ def get_explanations_nn(model, x_exp, x_back, dataset, knowledge, n_samples=100,
         X_back=x_back,
         X_exp=x_exp,
         n_samples=n_samples
-    )[0]  # The return values is a single element list
+    )[1]  # The return values is a single element list
     shap_values_df = pd.DataFrame(contribs)
 
     if save:
