@@ -296,6 +296,17 @@ def calculate_pvalue(X_train_,y_train_,data_id,model_id='nn',knowledge='train',f
         #print(pv_list)
     return np.array(pv_list)
 
+def process_column_evenly(values, slc=2): #checked
+    """ Cut the value space into `slc` slices"""
+    x = values.copy()
+    mx = x.max()
+    mi = x.min()
+    splited_values = np.linspace(mi,mx,slc)
+    splited_values[-1] = 1e+32
+    for i in range(len(splited_values)-1): #redundant features are eliminated here
+        x[(x>=splited_values[i])&(x<splited_values[i+1])] = splited_values[i]
+    return x,splited_values
+
 def process_column(values, slc=5): #checked
     """ Cut the value space into `slc` slices"""
     x = values.copy()
@@ -324,8 +335,8 @@ def calculate_variation_ratio(X, slc=5):
             space.append(1e23)
         else:
             #Get the value space of each feature
-            x, space = process_column(X[:,j],slc)
-            #x, space = utils.process_column_evenly(X[:,j],slc)
+            #x, space = process_column(X[:,j],slc)
+            x, space = utils.process_column_evenly(X[:,j],slc)
         #Calculate variation ratio
         counter = Counter(x)
         most_common = counter.most_common(1)
