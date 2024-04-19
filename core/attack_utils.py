@@ -326,7 +326,7 @@ def calculate_variation_ratio(X, slc=5):
         #Features containing only a single value are given a highest variation ratio (for ignoring it)
         if len(space) == 1:
             vrs.append(1)
-            c_values.append(0)
+            c_values.append(space[0])
             continue
         #Feature space is small than slice number, no need to cut.
         elif len(space) <= slc:
