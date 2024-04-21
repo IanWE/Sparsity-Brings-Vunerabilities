@@ -322,7 +322,7 @@ def calculate_variation_ratio(X, slc=5):
     vrs = []
     c_values = []
     for j in range(X.shape[1]):
-        space = set(X[:,j])
+        space = sorted(list(set(X[:,j])))
         #Features containing only a single value are given a highest variation ratio (for ignoring it)
         if len(space) == 1:
             vrs.append(1)
